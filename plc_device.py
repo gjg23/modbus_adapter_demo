@@ -13,7 +13,7 @@ import math
 import random
 import datetime as dt
 
-from pymodbus.datastore import ModbusServerContext, ModbusSequentialDataBlock
+from pymodbus.datastore import ModbusDeviceContext, ModbusSequentialDataBlock, ModbusServerContext
 from pymodbus.server import StartAsyncTcpServer
 
 # Get tcp settings
@@ -30,22 +30,23 @@ def gen_temp():
     noise = random.uniform(-1, 1)
     return int(base + noise)
 
-async def update_registers(store):
+async def update_registers(device):
     """Periodically update Modbus registers with new temperature values"""
     while True:
         temp = gen_temp()
-        store.setValues(TEMP_REGISTER, [temp])
+        device.setValues(3, 0, [temp])
         print(f"[PLC-Temperature] Updated temperature register to {temp} °F")
         await asyncio.sleep(1)
 
 async def run_server():
-    """Sets up the Modbus datastore (slave context)"""
+    """Sets up the Modbus datastore (device context)"""
     # Create a simple data block with 100 holding registers
     store = ModbusSequentialDataBlock(0, [0] * 100)
-    context = ModbusServerContext(devices=store, single=True)
+    device = ModbusDeviceContext(hr=store)
+    context = ModbusServerContext(devices={1: device}, single=False)
 
     # Start background task to update registers
-    asyncio.create_task(update_registers(store))
+    asyncio.create_task(update_registers(device))
 
     # Start Modbus TCP server
     print(f"[PLC-Temperature] Starting Modbus server on {PLC_HOST}:{PLC_PORT}")
