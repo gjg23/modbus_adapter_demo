@@ -1,0 +1,1 @@
+# This is the adapter which polls the plc device for temperature data and sends to the dashboard
