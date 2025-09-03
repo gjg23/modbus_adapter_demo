@@ -3,7 +3,7 @@
 """
 Simulated PLC device exposing temperature data via Modbus TCP.
 
-- Uses pymodbus to host a Modbus server.
+- Uses pymodbus to HOST a Modbus server.
 - Temperature is a function of time of day (sinusoidal) with noise.
 - Adapter.py will poll this register to get readings.
 """
@@ -16,10 +16,8 @@ import datetime as dt
 from pymodbus.datastore import ModbusServerContext, ModbusSequentialDataBlock
 from pymodbus.server import StartAsyncTcpServer
 
-# Modbus server settings
-HOST = "localhost"
-PORT = 5020
-TEMP_REGISTER = 0   # Holding this address for the temperature
+# Get tcp settings
+from config import *
 
 
 def gen_temp():
@@ -50,8 +48,8 @@ async def run_server():
     asyncio.create_task(update_registers(store))
 
     # Start Modbus TCP server
-    print(f"[PLC-Temperature] Starting Modbus server on {HOST}:{PORT}")
-    await StartAsyncTcpServer(context=context, address=(HOST, PORT))
+    print(f"[PLC-Temperature] Starting Modbus server on {PLC_HOST}:{PLC_PORT}")
+    await StartAsyncTcpServer(context=context, address=(PLC_HOST, PLC_PORT))
 
 
 if __name__ == "__main__":
